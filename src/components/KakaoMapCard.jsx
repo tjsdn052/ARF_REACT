@@ -31,9 +31,15 @@ export default function KakaoMapCard({ buildingId, buildingData }) {
 
   // 카카오맵 스크립트 로드
   useEffect(() => {
-    const KAKAO_MAP_API_KEY =
-      import.meta.env.VITE_KAKAO_MAP_API_KEY ||
-      "234e9fa0bdcf02eeb3d56cc7a733c696";
+    const KAKAO_MAP_API_KEY = import.meta.env.VITE_KAKAO_MAP_API_KEY;
+
+    // API 키가 없을 경우 백업 값 사용
+    if (!KAKAO_MAP_API_KEY) {
+      console.error("카카오맵 API 키가 환경변수에 설정되지 않았습니다.");
+      setMapUnavailable(true);
+      setLoading(false);
+      return;
+    }
 
     // 이미 로드된 경우 중복 로드 방지
     if (window.kakao && window.kakao.maps) {
