@@ -132,8 +132,11 @@ function BuildingList() {
 
     setLoading(true);
 
+    // API 기본 URL 설정
+    const apiBaseUrl = "https://afk-mock.onrender.com";
+
     // db.json에서 건물 정보 가져오기
-    fetch("/buildings")
+    fetch(`${apiBaseUrl}/buildings`)
       .then((res) => {
         if (!res.ok) {
           throw new Error("건물 데이터를 불러오는 데 실패했습니다");
