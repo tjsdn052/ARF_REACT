@@ -61,12 +61,15 @@ function BuildingDisplayComponent({ buildingId }) {
       try {
         setLoading(true);
 
+        // API 기본 URL 설정
+        const apiBaseUrl = "https://afk-mock.onrender.com";
+
         // API 요청에 타임아웃 적용
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 5000);
 
         // buildingId에 대한 건물 정보 가져오기
-        const response = await fetch(`/buildings/${buildingId}`);
+        const response = await fetch(`${apiBaseUrl}/buildings/${buildingId}`);
 
         clearTimeout(timeoutId);
 

@@ -266,12 +266,14 @@ export default function VWorldMaps({
 
   // 건물 데이터 로드
   useEffect(() => {
-    // buildingId가 있을 경우만 데이터 로드
     if (!buildingId || !visible) return;
 
     console.log(`건물 데이터 로드 시도: 건물 ID ${buildingId}`);
 
-    fetch(`/buildings/${buildingId}`)
+    // API 기본 URL 설정
+    const apiBaseUrl = "https://afk-mock.onrender.com";
+
+    fetch(`${apiBaseUrl}/buildings/${buildingId}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("건물 정보를 불러오는 데 실패했습니다.");
