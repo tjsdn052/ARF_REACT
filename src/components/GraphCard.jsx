@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import styles from "./GraphCard.module.css";
+<<<<<<< HEAD
 import { API_BASE_URL } from "../config/api";
+=======
+>>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
 import {
   LineChart,
   Line,
@@ -115,7 +118,11 @@ const GraphCard = ({ buildingId, buildingData }) => {
             date: crack.date,
             pointId: waypoint.id,
             pointName: waypoint.label || `웨이포인트 ${waypoint.id}`,
+<<<<<<< HEAD
             widthMm: crack.widthMm,
+=======
+            width_mm: crack.width_mm,
+>>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
           });
         });
       }
@@ -149,7 +156,12 @@ const GraphCard = ({ buildingId, buildingData }) => {
 
     try {
       // 실제 API 호출로 건물 데이터 가져오기
+<<<<<<< HEAD
       const response = await fetch(`${API_BASE_URL}/buildings/${buildingId}`);
+=======
+      const apiBaseUrl = "https://afk-mock.onrender.com";
+      const response = await fetch(`${apiBaseUrl}/buildings/${buildingId}`);
+>>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
 
       if (!response.ok) {
         throw new Error("건물 데이터를 불러오는 데 실패했습니다");
@@ -178,7 +190,11 @@ const GraphCard = ({ buildingId, buildingData }) => {
       }
 
       // 각 측정 지점을 별도의 선으로 표시
+<<<<<<< HEAD
       dataByDate[dateStr][`point_${item.pointId}`] = item.widthMm;
+=======
+      dataByDate[dateStr][`point_${item.pointId}`] = item.width_mm;
+>>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
       dataByDate[dateStr][`pointName_${item.pointId}`] = item.pointName;
     });
 

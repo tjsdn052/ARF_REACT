@@ -1,6 +1,9 @@
 import React, { useRef, useState, useEffect } from "react";
 import styles from "./ImageCard.module.css";
+<<<<<<< HEAD
 import { API_BASE_URL } from "../config/api";
+=======
+>>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
 import ImagePopup from "./ImagePopup";
 import ImageGallery from "./ImageGallery";
 
@@ -59,9 +62,16 @@ export default function ImageCard({ buildingId, buildingData }) {
     }
 
     setLoading(true);
+<<<<<<< HEAD
 
     // API에서 건물 데이터 가져오기
     fetch(`${API_BASE_URL}/buildings/${buildingId}`)
+=======
+    const apiBaseUrl = "https://afk-mock.onrender.com";
+
+    // API에서 건물 데이터 가져오기
+    fetch(`${apiBaseUrl}/buildings/${buildingId}`)
+>>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
       .then((response) => {
         if (!response.ok) {
           throw new Error("건물 데이터를 불러오는 데 실패했습니다");
@@ -100,7 +110,11 @@ export default function ImageCard({ buildingId, buildingData }) {
               images.push({
                 url: crack.imageUrl,
                 date: crack.date,
+<<<<<<< HEAD
                 widthMm: crack.widthMm,
+=======
+                width_mm: crack.width_mm,
+>>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
                 pointLabel: waypoint.label || `웨이포인트 ${waypoint.id}`,
               });
             }
@@ -179,7 +193,11 @@ export default function ImageCard({ buildingId, buildingData }) {
             url: validateImageUrl(wp.url || wp.imageUrl),
             label: wp.label || wp.pointLabel,
             date: wp.date,
+<<<<<<< HEAD
             widthMm: wp.widthMm,
+=======
+            width_mm: wp.width_mm,
+>>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
           };
         })
       : [];

@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+<<<<<<< HEAD
 import { API_BASE_URL } from "../config/api";
+=======
+>>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
 import styles from "../styles/BuildingsPage.module.css";
 
 // 요약 카드 컴포넌트
@@ -35,17 +38,30 @@ function BuildingCard({ building }) {
   // 마지막 점검일 계산
   const lastChecked = cracks.length
     ? cracks.reduce((latest, curr) =>
+<<<<<<< HEAD
         new Date(curr.timestamp) > new Date(latest.timestamp) ? curr : latest
       ).timestamp
+=======
+        new Date(curr.date) > new Date(latest.date) ? curr : latest
+      ).date
+>>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
     : null;
 
   const crackCount = cracks.length;
   const maxWidth = cracks.length
+<<<<<<< HEAD
     ? Math.max(...cracks.map((c) => c.widthMm || 0))
     : 0;
   const avgWidth = cracks.length
     ? (
         cracks.reduce((sum, c) => sum + (c.widthMm || 0), 0) / cracks.length
+=======
+    ? Math.max(...cracks.map((c) => c.width_mm || 0))
+    : 0;
+  const avgWidth = cracks.length
+    ? (
+        cracks.reduce((sum, c) => sum + (c.width_mm || 0), 0) / cracks.length
+>>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
       ).toFixed(2)
     : 0;
 
@@ -107,10 +123,14 @@ function BuildingCard({ building }) {
                   : "-"}
               </strong>
             </span>
+<<<<<<< HEAD
             <Link
               to={`/building/${building.id}`}
               className={styles.dashboardBtn}
             >
+=======
+            <Link to={`/crack/${building.id}`} className={styles.dashboardBtn}>
+>>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
               대시보드 바로가기
             </Link>
           </div>
@@ -136,8 +156,16 @@ function BuildingList() {
 
     setLoading(true);
 
+<<<<<<< HEAD
     // db.json에서 건물 정보 가져오기
     fetch(`${API_BASE_URL}/buildings`)
+=======
+    // API 기본 URL 설정
+    const apiBaseUrl = "https://afk-mock.onrender.com";
+
+    // db.json에서 건물 정보 가져오기
+    fetch(`${apiBaseUrl}/buildings`)
+>>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
       .then((res) => {
         if (!res.ok) {
           throw new Error("건물 데이터를 불러오는 데 실패했습니다");
@@ -208,9 +236,15 @@ function BuildingList() {
             buildingCrackCount += waypoint.cracks.length;
 
             waypoint.cracks.forEach((crack) => {
+<<<<<<< HEAD
               if (crack.widthMm) {
                 maxWidth = Math.max(maxWidth, crack.widthMm);
                 totalWidth += crack.widthMm;
+=======
+              if (crack.width_mm) {
+                maxWidth = Math.max(maxWidth, crack.width_mm);
+                totalWidth += crack.width_mm;
+>>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
                 crackCount++;
               }
             });

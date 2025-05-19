@@ -26,10 +26,17 @@ export default function Sidebar() {
       {/* 건물 통계 링크 */}
       <div
         className={`${styles.logo} ${
+<<<<<<< HEAD
           location.pathname === "/building/1" ? styles.active : ""
         }`}
       >
         <Link to="/building/1">
+=======
+          location.pathname === "/crack/1" ? styles.active : ""
+        }`}
+      >
+        <Link to="/crack/1">
+>>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
           <img src="/buildings.svg" alt="건물 통계" title="건물 통계" />
         </Link>
       </div>

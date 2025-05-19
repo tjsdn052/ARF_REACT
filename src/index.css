@@ -26,9 +26,15 @@ body {
   margin: 0;
   padding: 0;
   display: flex;
+<<<<<<< HEAD
   min-width: 1200px;
   min-height: 367px;
 
+=======
+  min-width: 320px;
+  min-height: 100vh;
+  max-width: 100vw;
+>>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
   overflow-x: hidden;
   box-sizing: border-box;
 }
