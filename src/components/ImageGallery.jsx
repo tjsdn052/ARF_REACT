@@ -53,11 +53,7 @@ export default function ImageGallery({
       index: index,
       label: image.label,
       date: image.date,
-<<<<<<< HEAD
       widthMm: image.widthMm,
-=======
-      width_mm: image.width_mm,
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
       firstImageUrl: firstImageUrl,
     });
   };
@@ -122,22 +118,13 @@ export default function ImageGallery({
             alt={`균열 이미지 ${index + 1}`}
             className={styles.image}
           />
-<<<<<<< HEAD
           {(image.label || image.widthMm) && (
-=======
-          {(image.label || image.width_mm) && (
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
             <div className={styles.imageInfo}>
               {image.label && (
                 <span className={styles.waypointLabel}>{image.label}</span>
               )}
-<<<<<<< HEAD
               {image.widthMm && (
                 <span className={styles.width}>{image.widthMm}mm</span>
-=======
-              {image.width_mm && (
-                <span className={styles.width}>{image.width_mm}mm</span>
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
               )}
             </div>
           )}
@@ -159,13 +146,7 @@ export default function ImageGallery({
           }
           onClose={closePopup}
           metadata={{
-<<<<<<< HEAD
             width: selectedImage.widthMm ? `${selectedImage.widthMm}mm` : null,
-=======
-            width: selectedImage.width_mm
-              ? `${selectedImage.width_mm}mm`
-              : null,
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
             firstImageUrl: selectedImage.firstImageUrl,
           }}
         />

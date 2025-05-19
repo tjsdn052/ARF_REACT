@@ -1,5 +1,6 @@
 import React, { useState, useEffect, memo, useMemo } from "react";
 import styles from "./BuildingDisplay.module.css";
+import { API_BASE_URL } from "../config/api";
 
 // 캐시를 저장할 객체
 const buildingCache = {};
@@ -61,15 +62,12 @@ function BuildingDisplayComponent({ buildingId }) {
       try {
         setLoading(true);
 
-        // API 기본 URL 설정
-        const apiBaseUrl = "http://3.37.127.247:8080";
-
         // API 요청에 타임아웃 적용
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 5000);
 
         // buildingId에 대한 건물 정보 가져오기
-        const response = await fetch(`${apiBaseUrl}/buildings/${buildingId}`);
+        const response = await fetch(`${API_BASE_URL}/buildings/${buildingId}`);
 
         clearTimeout(timeoutId);
 
