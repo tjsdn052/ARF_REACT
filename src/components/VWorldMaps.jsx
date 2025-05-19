@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import ReactDOM from "react-dom";
-<<<<<<< HEAD
+
 import { API_BASE_URL } from "../config/api";
-=======
-import styles from "./KakaoMap.module.css"; // 같은 스타일 사용
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
+
 import ImagePopup from "./ImagePopup"; // 외부 ImagePopup 컴포넌트 import
 
 export default function VWorldMaps({
@@ -12,11 +10,9 @@ export default function VWorldMaps({
   onClose,
   latitude = 37.5665,
   longitude = 126.978,
-<<<<<<< HEAD
+
   height = 200, // 기본 높이값을 200으로 설정
-=======
-  height = 200,
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
+
   buildingId = null, // 건물 ID prop 추가
   waypointId = null, // 웨이포인트 ID prop 추가
 }) {
@@ -40,11 +36,8 @@ export default function VWorldMaps({
   const [markers, setMarkers] = useState([]); // 마커 ID 관리를 위한 상태 추가
   const [cracks, setCracks] = useState([]); // 균열 데이터 상태 추가
   const [cesiumReady, setCesiumReady] = useState(false); // Cesium 초기화 상태 추가
-<<<<<<< HEAD
+
   const [showTooltip, setShowTooltip] = useState(false); // 툴크 표시 상태 추가
-=======
-  const [showTooltip, setShowTooltip] = useState(false); // 툴팁 표시 상태 추가
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
 
   // 초기 마운트 시 waypointId prop 적용을 위한 ref
   const initialMountRef = useRef(true);
@@ -159,19 +152,15 @@ export default function VWorldMaps({
       const markerId = `marker-${type}-${Date.now()}-${Math.random()
         .toString(36)
         .substr(2, 9)}`;
-<<<<<<< HEAD
 
       const entityOptions = {
-=======
-      const entity = cesiumViewerRef.current.entities.add({
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
         id: markerId,
         position: window.Cesium.Cartesian3.fromDegrees(
           longitude,
           latitude,
           height
         ),
-<<<<<<< HEAD
+
         label: label
           ? {
               text: label,
@@ -185,33 +174,12 @@ export default function VWorldMaps({
               disableDepthTestDistance: Number.POSITIVE_INFINITY,
 
               backgroundPadding: new window.Cesium.Cartesian2(7, 5),
-=======
-        point: {
-          pixelSize: 10,
-          color: window.Cesium.Color[color],
-          outlineColor: window.Cesium.Color.WHITE,
-          outlineWidth: 2,
-          disableDepthTestDistance: Number.POSITIVE_INFINITY,
-        },
-        label: label
-          ? {
-              text: label,
-              font: "14px sans-serif",
-              fillColor: window.Cesium.Color.WHITE,
-              outlineColor: window.Cesium.Color.BLACK,
-              outlineWidth: 2,
-              style: window.Cesium.LabelStyle.FILL_AND_OUTLINE,
-              verticalOrigin: window.Cesium.VerticalOrigin.TOP,
-              pixelOffset: new window.Cesium.Cartesian2(0, -10),
-              disableDepthTestDistance: Number.POSITIVE_INFINITY,
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
             }
           : undefined,
         properties: {
           type: type,
           waypointId: waypointId, // 웨이포인트 ID 저장
         },
-<<<<<<< HEAD
       };
 
       // 균열 마커는 경고 표시로 표시
@@ -236,9 +204,6 @@ export default function VWorldMaps({
       }
 
       const entity = cesiumViewerRef.current.entities.add(entityOptions);
-=======
-      });
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
 
       console.log(
         `마커 추가 성공: ${markerId}, 타입: ${type}, 웨이포인트ID: ${waypointId}`
@@ -251,7 +216,6 @@ export default function VWorldMaps({
     }
   };
 
-<<<<<<< HEAD
   // 경고 아이콘 생성 함수 (느낌표만 표시, 배경 없음)
   const createWarningIcon = (color) => {
     const canvas = document.createElement("canvas");
@@ -302,8 +266,6 @@ export default function VWorldMaps({
     return canvas.toDataURL();
   };
 
-=======
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
   // 마커 제거 함수
   const removeMarker = (markerId) => {
     if (!cesiumViewerRef.current) return;
@@ -383,14 +345,7 @@ export default function VWorldMaps({
 
     console.log(`건물 데이터 로드 시도: 건물 ID ${buildingId}`);
 
-<<<<<<< HEAD
     fetch(`${API_BASE_URL}/buildings/${buildingId}`)
-=======
-    // API 기본 URL 설정
-    const apiBaseUrl = "https://afk-mock.onrender.com";
-
-    fetch(`${apiBaseUrl}/buildings/${buildingId}`)
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
       .then((response) => {
         if (!response.ok) {
           throw new Error("건물 정보를 불러오는 데 실패했습니다.");
@@ -418,17 +373,11 @@ export default function VWorldMaps({
     }
 
     // 높이 값만 로그 출력
-<<<<<<< HEAD
+
     console.log(`현재 카메라 높이: ${height || 200}m`);
 
     // 기본 높이 설정 - 높이가 없으면 200으로 기본값 설정, 있으면 그대로 사용
     const defaultHeight = height || 200;
-=======
-    console.log(`현재 카메라 높이: ${height || 100}m`);
-
-    // 기본 높이 설정 - 높이가 없으면 100으로 기본값 설정, 있으면 그대로 사용
-    const defaultHeight = height || 100;
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
 
     const opts = new window.vw.MapOptions(
       window.vw.BasemapType.GRAPHIC,
@@ -475,7 +424,6 @@ export default function VWorldMaps({
               }
             }
 
-<<<<<<< HEAD
             // Cesium 뷰어가 준비되면 카메라 위치 설정
             if (cesiumViewerRef.current && window.Cesium) {
               const cameraPosition = window.Cesium.Cartesian3.fromDegrees(
@@ -494,8 +442,6 @@ export default function VWorldMaps({
               });
             }
 
-=======
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
             setCesiumReady(true);
             setMapReady(true);
             map.getElementById("poi_base").hide();
@@ -615,11 +561,8 @@ export default function VWorldMaps({
               (a, b) => new Date(b.date) - new Date(a.date)
             );
             const latestCrack = sortedCracks[0];
-<<<<<<< HEAD
+
             width = latestCrack.widthMm || 0;
-=======
-            width = latestCrack.width_mm || 0;
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
 
             // 균열 폭에 따른 심각도 결정
             if (width >= 1.5) {
@@ -1093,11 +1036,7 @@ export default function VWorldMaps({
                     }}
                   >
                     LOD1과 LOD4는 지역에 따라 다르게 적용될 수 있습니다. 건물이
-<<<<<<< HEAD
                     보이지 않는다면, LOD 수준을 변경해주세요.
-=======
-                    보이지 않는다면, LOD 설정을 LOD1이나 LOD4로 변경해보세요.
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
                   </p>
 
                   <p

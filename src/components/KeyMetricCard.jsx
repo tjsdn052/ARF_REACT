@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styles from "./KeyMetricCard.module.css";
-<<<<<<< HEAD
+
 import { API_BASE_URL } from "../config/api";
-=======
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
 
 function KeyMetricCard({ buildingId, buildingData: propsBuildingData }) {
   const [loading, setLoading] = useState(true);
@@ -27,16 +25,9 @@ function KeyMetricCard({ buildingId, buildingData: propsBuildingData }) {
 
     // 전달받은 데이터가 없는 경우에만 API 요청
     setLoading(true);
-<<<<<<< HEAD
 
     // 건물 데이터 가져오기
     fetch(`${API_BASE_URL}/buildings/${buildingId}`)
-=======
-    const apiBaseUrl = "https://afk-mock.onrender.com";
-
-    // 건물 데이터 가져오기
-    fetch(`${apiBaseUrl}/buildings/${buildingId}`)
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
       .then((response) => {
         if (!response.ok) {
           throw new Error("건물 데이터를 불러오는 데 실패했습니다");
@@ -61,7 +52,6 @@ function KeyMetricCard({ buildingId, buildingData: propsBuildingData }) {
       return;
     }
 
-<<<<<<< HEAD
     // 날짜별 균열 정보 분류
     const cracksByDate = {};
     let latestDate = null;
@@ -92,30 +82,7 @@ function KeyMetricCard({ buildingId, buildingData: propsBuildingData }) {
           );
 
           // 가장 최근 점검일 업데이트
-=======
-    // 모든 균열 정보 모으기
-    let latestDate = null;
 
-    // 웨이포인트당 하나의 균열로 계산 (웨이포인트 수 = 균열 수)
-    const totalCracks = data.waypoints.length;
-
-    // 날짜별 웨이포인트 수 계산
-    const cracksByDate = {};
-
-    data.waypoints.forEach((waypoint) => {
-      if (waypoint.cracks && waypoint.cracks.length > 0) {
-        // 가장 최근 점검일 찾기
-        waypoint.cracks.forEach((crack) => {
-          const crackDate = new Date(crack.date);
-
-          // 날짜별 웨이포인트 수 누적
-          const dateStr = crack.date;
-          if (!cracksByDate[dateStr]) {
-            cracksByDate[dateStr] = new Set();
-          }
-          cracksByDate[dateStr].add(waypoint.id);
-
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
           if (!latestDate || crackDate > latestDate) {
             latestDate = crackDate;
           }
@@ -124,17 +91,11 @@ function KeyMetricCard({ buildingId, buildingData: propsBuildingData }) {
     });
 
     setLastInspection(latestDate ? latestDate.toISOString() : null);
-
-<<<<<<< HEAD
     // 날짜별 정보를 날짜순으로 정렬
-=======
-    // 날짜별 웨이포인트 수 정렬
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
     const sortedDates = Object.keys(cracksByDate).sort(
       (a, b) => new Date(b) - new Date(a)
     );
 
-<<<<<<< HEAD
     // 마지막 점검일과 이전 점검일 정보
     const latestDateStr = sortedDates[0] || null;
     const previousDateStr = sortedDates[1] || null;
@@ -154,25 +115,6 @@ function KeyMetricCard({ buildingId, buildingData: propsBuildingData }) {
     if (latestDateStr && previousDateStr) {
       const previousCrackCount = cracksByDate[previousDateStr].waypointIds.size;
       crackCountChange = latestCrackCount - previousCrackCount;
-=======
-    // 최대 균열 폭 계산
-    let maxWidth = 0;
-    data.waypoints.forEach((waypoint) => {
-      if (waypoint.cracks && waypoint.cracks.length > 0) {
-        const waypointMaxWidth = Math.max(
-          ...waypoint.cracks.map((crack) => crack.width_mm || 0)
-        );
-        maxWidth = Math.max(maxWidth, waypointMaxWidth);
-      }
-    });
-
-    // 균열 수 변화량 계산 (최근 두 날짜 사이의 차이)
-    let crackCountChange = 0;
-    if (sortedDates.length >= 2) {
-      const latestCount = cracksByDate[sortedDates[0]].size;
-      const previousCount = cracksByDate[sortedDates[1]].size;
-      crackCountChange = latestCount - previousCount;
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
     }
 
     // 메트릭 설정
@@ -195,11 +137,9 @@ function KeyMetricCard({ buildingId, buildingData: propsBuildingData }) {
           </svg>
         ),
         label: "전체 균열 수",
-<<<<<<< HEAD
+
         value: latestCrackCount,
-=======
-        value: totalCracks,
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
+
         unit: "개",
         change: null,
         changeType: null,
@@ -222,11 +162,9 @@ function KeyMetricCard({ buildingId, buildingData: propsBuildingData }) {
           </svg>
         ),
         label: "최대 균열 폭",
-<<<<<<< HEAD
+
         value: latestMaxWidth,
-=======
-        value: maxWidth,
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
+
         unit: "mm",
         change: null,
         changeType: null,

@@ -24,11 +24,8 @@ function App() {
               path="/buildings/add"
               element={<div>건물 추가 페이지</div>}
             />
-<<<<<<< HEAD
+
             <Route path="/building/:id" element={<CrackDetail />} />
-=======
-            <Route path="/crack/:id" element={<CrackDetail />} />
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
           </Routes>
         </div>
       </div>

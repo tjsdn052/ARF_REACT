@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import styles from "./MapCard.module.css"; // 카드 스타일
 import mapStyles from "./KakaoMap.module.css"; // 지도 스타일
-<<<<<<< HEAD
 import { API_BASE_URL } from "../config/api";
-=======
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
+
 import VWorldMaps from "./VWorldMaps"; // VWorldMaps 컴포넌트 import
 
 /**
@@ -100,14 +98,8 @@ export default function KakaoMapCard({ buildingId, buildingData }) {
 
     // buildingData가 없는 경우에만 API 요청
     setLoading(true);
-<<<<<<< HEAD
 
     fetch(`${API_BASE_URL}/buildings/${buildingId}`)
-=======
-    const apiBaseUrl = "https://afk-mock.onrender.com";
-
-    fetch(`${apiBaseUrl}/buildings/${buildingId}`)
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
       .then((response) => {
         if (!response.ok) {
           throw new Error("건물 데이터를 불러오는 데 실패했습니다");
@@ -199,10 +191,7 @@ export default function KakaoMapCard({ buildingId, buildingData }) {
         // 건물 마커 클릭 시 VWorldMaps 모달 열기
         setSelectedLocation({ lat: latitude, lng: longitude });
         setSelectedWaypointId(null);
-<<<<<<< HEAD
         // 건물의 경우 기본 높이 200m로 설정
-=======
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
         setVworldVisible(true);
       });
 
@@ -245,11 +234,7 @@ export default function KakaoMapCard({ buildingId, buildingData }) {
                   <b>${point.label || `웨이포인트 ${index + 1}`}</b>
                   ${
                     point.cracks && point.cracks.length > 0
-<<<<<<< HEAD
                       ? `<br>최근 측정: ${point.cracks[0].widthMm}mm`
-=======
-                      ? `<br>최근 측정: ${point.cracks[0].width_mm}mm`
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
                       : ""
                   }
                 </div>
@@ -392,11 +377,7 @@ export default function KakaoMapCard({ buildingId, buildingData }) {
           onClose={() => setVworldVisible(false)}
           latitude={selectedLocation.lat}
           longitude={selectedLocation.lng}
-<<<<<<< HEAD
           height={200} // 명시적으로 높이값 지정
-=======
-          height={200}
->>>>>>> 7ae69d123087776ebc6e0d5651766201e85ef1fd
           buildingId={buildingId}
           waypointId={selectedWaypointId}
         />
