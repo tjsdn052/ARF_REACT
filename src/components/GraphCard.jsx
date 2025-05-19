@@ -86,13 +86,11 @@ const GraphCard = ({ buildingId, buildingData }) => {
       return;
     }
 
-    // buildingData가 있으면 바로 처리
     if (buildingData) {
       processBuilding(buildingData);
       return;
     }
 
-    // buildingData가 없는 경우에만 API 호출
     processData(buildingId);
   }, [buildingId, buildingData]);
 
@@ -112,7 +110,7 @@ const GraphCard = ({ buildingId, buildingData }) => {
       if (waypoint.cracks && waypoint.cracks.length > 0) {
         waypoint.cracks.forEach((crack) => {
           allMeasurements.push({
-            date: crack.date,
+            date: crack.timestamp,
             pointId: waypoint.id,
             pointName: waypoint.label || `웨이포인트 ${waypoint.id}`,
             widthMm: crack.widthMm,
@@ -170,7 +168,7 @@ const GraphCard = ({ buildingId, buildingData }) => {
     const dataByDate = {};
 
     measurements.forEach((item) => {
-      const dateStr = item.date;
+      const dateStr = item.date.split("T")[0]; // ISO 날짜에서 날짜 부분만 추출
       if (!dataByDate[dateStr]) {
         dataByDate[dateStr] = {
           date: dateStr,
@@ -264,7 +262,7 @@ const GraphCard = ({ buildingId, buildingData }) => {
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
                 data={graphData}
-                margin={{ top: 20, right: 10, left: 0, bottom: 30 }}
+                margin={{ top: 20, right: 30, left: 20, bottom: 30 }}
               >
                 {/* 그리드 라인 */}
                 <CartesianGrid
@@ -276,34 +274,30 @@ const GraphCard = ({ buildingId, buildingData }) => {
                 {/* X축 (날짜) */}
                 <XAxis
                   dataKey="date"
-                  stroke="#333"
-                  tick={{ fill: "#999" }}
-                  style={{ fontSize: "0.8rem" }}
+                  stroke="#666"
+                  tick={{ fill: "#666", fontSize: "0.8rem" }}
                   axisLine={false}
                   tickLine={false}
                 />
 
                 {/* Y축 (균열 폭, mm 단위) */}
                 <YAxis
-                  stroke="#333"
-                  tick={{ fill: "#999" }}
-                  domain={[0, 1.6]} /* Y축 범위 고정 */
-                  style={{ fontSize: "0.8rem" }}
+                  stroke="#666"
+                  tick={{ fill: "#666", fontSize: "0.8rem" }}
+                  domain={[0, "auto"]}
                   axisLine={false}
                   tickLine={false}
-                  width={30} /* Y축 너비 설정 */
+                  width={30}
                 />
 
-                {/* 툴크 (마우스 오버 시 상세 정보) */}
+                {/* 툴크 */}
                 <Tooltip
                   cursor={{ stroke: "#ccc", strokeDasharray: "3 3" }}
                   contentStyle={{
-                    backgroundColor: "rgba(255, 255, 255, 0.9)",
-                    border: "1px solid #e0e0e0",
+                    backgroundColor: "white",
+                    border: "none",
                     borderRadius: "4px",
-                    color: "#333",
-                    fontSize: "0.8rem",
-                    padding: "0.5rem 0.8rem",
+                    padding: "8px",
                     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                   }}
                   itemStyle={{ padding: "2px 0" }}
@@ -316,28 +310,6 @@ const GraphCard = ({ buildingId, buildingData }) => {
                 {/* 각 웨이포인트별 측정 라인 */}
                 {getLines().map((line, index) => {
                   const lineColor = generateColor(index);
-                  // RGBA 색상 생성을 위한 함수
-                  const getRGBA = (hex, alpha) => {
-                    const r = parseInt(hex.slice(1, 3), 16);
-                    const g = parseInt(hex.slice(3, 5), 16);
-                    const b = parseInt(hex.slice(5, 7), 16);
-                    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-                  };
-
-                  // 각 선의 색상에 맞는 그림자 효과 생성
-                  const shadowFilter = `drop-shadow(0px 2.25px 2.25px ${getRGBA(
-                    lineColor,
-                    0.4
-                  )}) 
-                                     drop-shadow(0px 4.5px 6.75px ${getRGBA(
-                                       lineColor,
-                                       0.4
-                                     )}) 
-                                     drop-shadow(0px 6.75px 13.5px ${getRGBA(
-                                       lineColor,
-                                       0.4
-                                     )})`;
-
                   return (
                     <Line
                       key={line.id}
@@ -345,20 +317,19 @@ const GraphCard = ({ buildingId, buildingData }) => {
                       dataKey={line.dataKey}
                       name={line.name}
                       stroke={lineColor}
-                      strokeWidth={0.75}
+                      strokeWidth={2}
                       dot={{
                         r: 4,
                         fill: "#fff",
                         stroke: lineColor,
-                        strokeWidth: 0.75,
+                        strokeWidth: 2,
                       }}
                       activeDot={{
                         r: 6,
                         fill: lineColor,
                         stroke: "#fff",
-                        strokeWidth: 0.75,
+                        strokeWidth: 2,
                       }}
-                      filter={shadowFilter}
                     />
                   );
                 })}
