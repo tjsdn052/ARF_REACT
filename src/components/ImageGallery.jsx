@@ -26,6 +26,7 @@ export default function ImageGallery({
 
     // 첫 관측 이미지 찾기
     let firstImageUrl = null;
+    let firstWidthMm = null;
     if (buildingImages && buildingImages.length > 0) {
       // 같은 웨이포인트의 가장 오래된 이미지 찾기
       const waypointImages = buildingImages.filter(
@@ -35,10 +36,11 @@ export default function ImageGallery({
       if (waypointImages.length > 0) {
         // 날짜순 정렬
         waypointImages.sort((a, b) => new Date(a.date) - new Date(b.date));
-        // 가장 오래된 이미지 URL
+        // 가장 오래된 이미지 URL과 균열폭
         firstImageUrl = validateImageUrl(
           waypointImages[0].url || waypointImages[0].imageUrl
         );
+        firstWidthMm = waypointImages[0].widthMm;
       }
     }
 
@@ -46,6 +48,7 @@ export default function ImageGallery({
     // 이미지가 없는 경우에는 현재 이미지를 첫 관측 이미지로 사용
     if (!firstImageUrl) {
       firstImageUrl = imageUrl;
+      firstWidthMm = image.widthMm;
     }
 
     setSelectedImage({
@@ -55,6 +58,7 @@ export default function ImageGallery({
       date: image.date,
       widthMm: image.widthMm,
       firstImageUrl: firstImageUrl,
+      firstWidthMm: firstWidthMm,
     });
   };
 
@@ -148,6 +152,9 @@ export default function ImageGallery({
           metadata={{
             width: selectedImage.widthMm ? `${selectedImage.widthMm}mm` : null,
             firstImageUrl: selectedImage.firstImageUrl,
+            firstWidth: selectedImage.firstWidthMm
+              ? `${selectedImage.firstWidthMm}mm`
+              : null,
           }}
         />
       )}

@@ -558,7 +558,7 @@ export default function VWorldMaps({
           if (waypoint.cracks && waypoint.cracks.length > 0) {
             // 날짜 기준으로 정렬하여 최신 데이터 가져오기
             const sortedCracks = [...waypoint.cracks].sort(
-              (a, b) => new Date(b.date) - new Date(a.date)
+              (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
             );
             const latestCrack = sortedCracks[0];
 
@@ -1154,7 +1154,7 @@ const WaypointCrackGallery = ({ waypoints, selectedWaypointId }) => {
   const sortedCracks = useMemo(() => {
     if (!selectedWaypoint?.cracks?.length) return [];
     return [...selectedWaypoint.cracks].sort(
-      (a, b) => new Date(b.date) - new Date(a.date)
+      (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
     );
   }, [selectedWaypoint]);
 
@@ -1213,12 +1213,13 @@ const WaypointCrackGallery = ({ waypoints, selectedWaypointId }) => {
         selectedWaypoint.label || `웨이포인트 ${selectedWaypoint.id}`
       } - 균열 사진`,
       metadata: {
-        date: formatDate(crack.date),
-        width: `${crack.width_mm}mm`,
+        date: formatDate(crack.timestamp),
+        width: `${crack.widthMm}mm`,
         // 첫 관측 이미지가 있으면 추가 (비교 모드용)
         firstImageUrl: firstCrack
           ? normalizeImageUrl(firstCrack.imageUrl)
           : null,
+        firstWidth: firstCrack ? `${firstCrack.widthMm}mm` : null,
       },
     });
     setShowImagePopup(true);
@@ -1248,23 +1249,22 @@ const WaypointCrackGallery = ({ waypoints, selectedWaypointId }) => {
         <div style={{ marginBottom: "16px" }}>
           <img
             src={normalizeImageUrl(selectedCrack.imageUrl)}
-            alt={`균열 (${selectedCrack.date})`}
+            alt={`균열 (${selectedCrack.timestamp})`}
             style={{
               width: "100%",
               height: "45vh",
               objectFit: "contain",
-
               borderRadius: "4px",
-              cursor: "pointer", // 커서 포인터 추가
+              cursor: "pointer",
             }}
-            onClick={() => openImagePopup(selectedCrack)} // 클릭 시 팝업 열기
+            onClick={() => openImagePopup(selectedCrack)}
           />
           <div style={{ marginTop: "8px" }}>
             <div style={{ fontSize: "16px", fontWeight: "bold" }}>
-              {formatDate(selectedCrack.date)}
+              {formatDate(selectedCrack.timestamp)}
             </div>
             <div style={{ fontSize: "14px", color: "#666" }}>
-              균열폭: {selectedCrack.width_mm}mm
+              균열폭: {selectedCrack.widthMm}mm
             </div>
           </div>
         </div>
@@ -1294,17 +1294,16 @@ const WaypointCrackGallery = ({ waypoints, selectedWaypointId }) => {
           >
             <img
               src={normalizeImageUrl(crack.imageUrl)}
-              alt={`균열 (${crack.date})`}
+              alt={`균열 (${crack.timestamp})`}
               style={{
                 width: "100%",
                 height: "80px",
                 objectFit: "cover",
               }}
               onClick={(e) => {
-                e.stopPropagation(); // 이벤트 버블링 방지
+                e.stopPropagation();
                 setSelectedCrack(crack);
 
-                // 썸네일 이미지 더블 클릭 시 팝업 열기
                 if (e.detail === 2) {
                   openImagePopup(crack);
                 }
@@ -1323,7 +1322,7 @@ const WaypointCrackGallery = ({ waypoints, selectedWaypointId }) => {
                 textAlign: "center",
               }}
             >
-              {formatDate(crack.date).substring(0, 10)} ({crack.width_mm}mm)
+              {formatDate(crack.timestamp).substring(0, 10)} ({crack.widthMm}mm)
             </div>
           </div>
         ))}

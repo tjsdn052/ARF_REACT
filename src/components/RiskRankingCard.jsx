@@ -120,21 +120,21 @@ export default function RiskRankingCard({ buildingId, buildingData }) {
               id: point.id,
               label: point.label,
               latestWidth: 0,
-              date: null,
+              timestamp: null,
               location: point.location,
             };
           }
 
           // 날짜로 정렬하여 최신 값 가져오기
           const sortedCracks = [...point.cracks].sort(
-            (a, b) => new Date(b.date) - new Date(a.date)
+            (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
           );
 
           return {
             id: point.id,
             label: point.label,
             latestWidth: sortedCracks[0].widthMm || 0,
-            date: sortedCracks[0].date,
+            timestamp: sortedCracks[0].timestamp,
             location: point.location,
           };
         })
@@ -194,9 +194,9 @@ export default function RiskRankingCard({ buildingId, buildingData }) {
   const stats = getClusterStats();
 
   // 날짜 포맷팅 함수
-  const formatDate = (dateString) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
+  const formatDate = (timestamp) => {
+    if (!timestamp) return "";
+    const date = new Date(timestamp);
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
     const day = date.getDate();
@@ -250,10 +250,10 @@ export default function RiskRankingCard({ buildingId, buildingData }) {
                     <div className={styles.pointInfo}>
                       <div className={styles.pointLabel}>{point.label}</div>
                       <div className={styles.pointMeta}>
-                        {point.date && (
+                        {point.timestamp && (
                           <>
                             <span className={styles.date}>
-                              {formatDate(point.date)}
+                              {formatDate(point.timestamp)}
                             </span>
                             <span className={styles.dot}>•</span>
                           </>

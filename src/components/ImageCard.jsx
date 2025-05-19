@@ -91,15 +91,15 @@ export default function ImageCard({ buildingId, buildingData }) {
         if (waypoint.cracks && waypoint.cracks.length > 0) {
           waypoint.cracks.forEach((crack) => {
             // 날짜 정보 추가
-            if (crack.date) {
-              dateSet.add(crack.date);
+            if (crack.timestamp) {
+              dateSet.add(crack.timestamp);
             }
 
             // 이미지 정보 추가
             if (crack.imageUrl) {
               images.push({
                 url: crack.imageUrl,
-                date: crack.date,
+                date: crack.timestamp,
                 widthMm: crack.widthMm,
                 pointLabel: waypoint.label || `웨이포인트 ${waypoint.id}`,
               });

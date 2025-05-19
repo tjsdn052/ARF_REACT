@@ -165,7 +165,9 @@ const ImagePopup = ({ imageUrl, description, onClose, metadata }) => {
                   alt="첫 관측 이미지"
                   className={styles.compareImage}
                 />
-                <div className={styles.compareLabel}>첫 관측</div>
+                <div className={styles.compareLabel}>
+                  첫 관측 ({metadata?.firstWidth || "측정값 없음"})
+                </div>
               </div>
               <div className={styles.compareImageWrapper}>
                 <img
@@ -173,7 +175,9 @@ const ImagePopup = ({ imageUrl, description, onClose, metadata }) => {
                   alt={description}
                   className={styles.compareImage}
                 />
-                <div className={styles.compareLabel}>최근 관측</div>
+                <div className={styles.compareLabel}>
+                  최근 관측 ({metadata?.width || "측정값 없음"})
+                </div>
               </div>
             </div>
           ) : (
