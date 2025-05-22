@@ -35,20 +35,24 @@ function BuildingCard({ building }) {
     ? (cracks.reduce((s, c) => s + (c.widthMm || 0), 0) / crackCount).toFixed(2)
     : 0;
 
+  // 크랙 타입 목록 추출
+  const crackTypes = [...new Set(cracks.map((c) => c.crackType))];
+
   return (
     <div className={styles.buildingCard}>
       <div className={styles.infoTop}>
         <h3 className={styles.buildingTitle}>{building.name}</h3>
         <p className={styles.address}>{building.address || "\u00A0"}</p>
         <div className={styles.crackTags}>
-          {(building.crackTypes?.length > 0
-            ? building.crackTypes
-            : ["가로형", "세로형", "경사형", "망상형"]
-          ).map((t) => (
-            <span key={t} className={styles.crackTag}>
-              {t}
-            </span>
-          ))}
+          {crackTypes.length > 0 ? (
+            crackTypes.map((t) => (
+              <span key={t} className={styles.crackTag}>
+                {t}
+              </span>
+            ))
+          ) : (
+            <span className={styles.crackTag}>크랙 없음</span>
+          )}
         </div>
       </div>
 
