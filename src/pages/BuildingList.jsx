@@ -1,8 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-
+import React, { useEffect, useState, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { API_BASE_URL } from "../config/api";
-
 import styles from "../styles/BuildingsPage.module.css";
 
 // 요약 카드 컴포넌트
@@ -17,27 +15,15 @@ function SummaryCard({ title, value }) {
 
 // 건물 카드 컴포넌트
 function BuildingCard({ building }) {
-  // 건물의 웨이포인트와 균열 정보 확인
-  const waypoints = building.waypoints || [];
-  const cracks = [];
+  const cracks = building.waypoints
+    ? building.waypoints.flatMap(
+        (wp) => wp.cracks?.map((c) => ({ ...c, waypointLabel: wp.label })) || []
+      )
+    : [];
 
-  // 모든 웨이포인트의 모든 균열 정보 수집
-  waypoints.forEach((waypoint) => {
-    if (waypoint.cracks && waypoint.cracks.length > 0) {
-      cracks.push(
-        ...waypoint.cracks.map((crack) => ({
-          ...crack,
-          waypointId: waypoint.id,
-          waypointLabel: waypoint.label,
-        }))
-      );
-    }
-  });
-
-  // 마지막 점검일 계산
   const lastChecked = cracks.length
-    ? cracks.reduce((latest, curr) =>
-        new Date(curr.timestamp) > new Date(latest.timestamp) ? curr : latest
+    ? cracks.reduce((a, b) =>
+        new Date(a.timestamp) > new Date(b.timestamp) ? a : b
       ).timestamp
     : null;
 
@@ -46,9 +32,7 @@ function BuildingCard({ building }) {
     ? Math.max(...cracks.map((c) => c.widthMm || 0))
     : 0;
   const avgWidth = cracks.length
-    ? (
-        cracks.reduce((sum, c) => sum + (c.widthMm || 0), 0) / cracks.length
-      ).toFixed(2)
+    ? (cracks.reduce((s, c) => s + (c.widthMm || 0), 0) / crackCount).toFixed(2)
     : 0;
 
   return (
@@ -56,23 +40,15 @@ function BuildingCard({ building }) {
       <div className={styles.infoTop}>
         <h3 className={styles.buildingTitle}>{building.name}</h3>
         <p className={styles.address}>{building.address || "\u00A0"}</p>
-
-        {/* 균열 종류 태그 */}
         <div className={styles.crackTags}>
-          {building.crackTypes &&
-            building.crackTypes.map((type, index) => (
-              <span key={index} className={styles.crackTag}>
-                {type}
-              </span>
-            ))}
-          {(!building.crackTypes || building.crackTypes.length === 0) && (
-            <>
-              <span className={styles.crackTag}>가로형</span>
-              <span className={styles.crackTag}>세로형</span>
-              <span className={styles.crackTag}>경사형</span>
-              <span className={styles.crackTag}>망상형</span>
-            </>
-          )}
+          {(building.crackTypes?.length > 0
+            ? building.crackTypes
+            : ["가로형", "세로형", "경사형", "망상형"]
+          ).map((t) => (
+            <span key={t} className={styles.crackTag}>
+              {t}
+            </span>
+          ))}
         </div>
       </div>
 
@@ -91,7 +67,7 @@ function BuildingCard({ building }) {
       <div className={styles.infoBottom}>
         <div className={styles.metrics}>
           <p>
-            균열 수: <strong>{crackCount}개</strong>
+            균열 수: <strong>{crackCount}</strong>
           </p>
           <p>
             최대 균열 폭: <strong>{maxWidth} mm</strong>
@@ -125,175 +101,133 @@ function BuildingCard({ building }) {
 // 메인 페이지 컴포넌트
 function BuildingList() {
   const [buildings, setBuildings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
   const [filteredBuildings, setFilteredBuildings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState();
+  const [searchTerm, setSearchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState([]);
-  const [buildingsLoaded, setBuildingsLoaded] = useState(false); // 데이터 로드 여부 추적
 
+  // mm 단위에 맞춘 위험도 계산
+  const getCrackSeverity = (maxWidthMm) => {
+    if (maxWidthMm == null) return "관찰";
+    if (maxWidthMm >= 0.3) return "심각";
+    if (maxWidthMm >= 0.2) return "주의";
+    return "관찰";
+  };
+
+  // 초기 데이터 로드
   useEffect(() => {
-    // 데이터를 한 번만 로드하도록 함
-    if (buildingsLoaded) return;
-
-    setLoading(true);
-
-    // db.json에서 건물 정보 가져오기
     fetch(`${API_BASE_URL}/buildings`)
       .then((res) => {
-        if (!res.ok) {
-          throw new Error("건물 데이터를 불러오는 데 실패했습니다");
-        }
+        if (!res.ok) throw new Error("건물 데이터 로드 실패");
         return res.json();
       })
       .then((data) => {
-        // json-server는 buildings 배열을 직접 반환하므로 data가 배열임
-        console.log("건물 데이터 로드 완료:", data.length, "개");
         setBuildings(data);
-        setFilteredBuildings(data);
         setLoading(false);
-        setBuildingsLoaded(true); // 데이터 로드 완료 표시
       })
-      .catch((err) => {
-        console.error("건물 데이터 불러오기 실패", err);
-        setError(err.message);
+      .catch((e) => {
+        setError(e.message);
         setLoading(false);
       });
-  }, [buildingsLoaded]); // buildingsLoaded에만 의존하도록 변경
+  }, []);
 
-  // 검색어와 필터에 따라 건물 목록 필터링
+  // 검색 & 필터 적용
   useEffect(() => {
-    if (!buildingsLoaded || buildings.length === 0) return;
+    if (loading || error) return;
 
-    console.log("필터링 실행: 검색어", searchTerm, "활성 필터:", activeFilters);
-
-    let filtered = [...buildings];
-
-    // 검색어로 필터링
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (building) =>
-          building.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (building.address &&
-            building.address.toLowerCase().includes(searchTerm.toLowerCase()))
+    const term = searchTerm.trim().toLowerCase();
+    let result = buildings.filter((b) => {
+      // 검색어 매칭
+      return (
+        !term ||
+        b.name?.toLowerCase().includes(term) ||
+        b.address?.toLowerCase().includes(term)
       );
-    }
+    });
 
-    // 균열 유형 필터 적용
+    // 심각도 필터링
     if (activeFilters.length > 0) {
-      filtered = filtered.filter((building) => {
-        if (!building.crackTypes) return false;
-        return activeFilters.some((filter) =>
-          building.crackTypes.includes(filter)
-        );
+      result = result.filter((b) => {
+        const widths = b.waypoints
+          ? b.waypoints.flatMap(
+              (wp) =>
+                wp.cracks?.map((c) => c.widthMm).filter((w) => w != null) || []
+            )
+          : [];
+        const maxWidth = widths.length ? Math.max(...widths) : null;
+        const severity = getCrackSeverity(maxWidth);
+        return activeFilters.includes(severity);
       });
     }
 
-    console.log("필터링 결과:", filtered.length, "개");
-    setFilteredBuildings(filtered);
-  }, [searchTerm, activeFilters, buildings, buildingsLoaded]);
+    setFilteredBuildings(result);
+  }, [buildings, searchTerm, activeFilters, loading, error]);
 
-  // 균열 통계 계산
-  const calculateCrackStats = () => {
+  // 요약 통계
+  const crackStats = useMemo(() => {
     let totalCracks = 0;
-    const buildingsWithCracks = [];
+    const stats = [];
 
-    buildings.forEach((building) => {
-      let buildingCrackCount = 0;
-      let maxWidth = 0;
-      let totalWidth = 0;
-      let crackCount = 0;
-
-      if (building.waypoints) {
-        building.waypoints.forEach((waypoint) => {
-          if (waypoint.cracks && waypoint.cracks.length > 0) {
-            buildingCrackCount += waypoint.cracks.length;
-
-            waypoint.cracks.forEach((crack) => {
-              if (crack.widthMm) {
-                maxWidth = Math.max(maxWidth, crack.widthMm);
-                totalWidth += crack.widthMm;
-                crackCount++;
-              }
-            });
-          }
-        });
-      }
-
-      totalCracks += buildingCrackCount;
-
-      if (buildingCrackCount > 0) {
-        buildingsWithCracks.push({
-          id: building.id,
-          name: building.name,
-          crackCount: buildingCrackCount,
-          maxWidth: maxWidth,
-          avgWidth: crackCount > 0 ? totalWidth / crackCount : 0,
+    buildings.forEach((b) => {
+      const widths = b.waypoints
+        ? b.waypoints.flatMap(
+            (wp) =>
+              wp.cracks?.map((c) => c.widthMm).filter((w) => w != null) || []
+          )
+        : [];
+      const count = widths.length;
+      totalCracks += count;
+      if (count > 0) {
+        stats.push({
+          id: b.id,
+          name: b.name,
+          crackCount: count,
+          maxWidth: Math.max(...widths),
+          avgWidth: widths.reduce((s, w) => s + w, 0) / count,
         });
       }
     });
 
-    // 균열 수로 정렬
-    const sortedByCount = [...buildingsWithCracks].sort(
-      (a, b) => b.crackCount - a.crackCount
-    );
-
-    // 최대 폭으로 정렬
-    const sortedByWidth = [...buildingsWithCracks].sort(
-      (a, b) => b.maxWidth - a.maxWidth
-    );
-
-    // 평균 폭으로 정렬 (확장 속도 대용)
-    const sortedByAvgWidth = [...buildingsWithCracks].sort(
-      (a, b) => b.avgWidth - a.avgWidth
-    );
+    const sortBy = (key) =>
+      [...stats].sort((a, b) => b[key] - a[key]).slice(0, 3);
 
     return {
       totalCracks,
-      sortedByCount: sortedByCount.slice(0, 3), // 상위 3개만 반환
-      sortedByWidth: sortedByWidth.slice(0, 3), // 상위 3개만 반환
-      sortedByAvgWidth: sortedByAvgWidth.slice(0, 3), // 상위 3개만 반환
+      sortedByCount: sortBy("crackCount"),
+      sortedByWidth: sortBy("maxWidth"),
+      sortedByAvgWidth: sortBy("avgWidth"),
     };
-  };
-
-  // 필터 토글
-  const toggleFilter = (filter) => {
-    if (activeFilters.includes(filter)) {
-      setActiveFilters(activeFilters.filter((f) => f !== filter));
-    } else {
-      setActiveFilters([...activeFilters, filter]);
-    }
-  };
-
-  // 균열 통계
-  const crackStats = calculateCrackStats();
+  }, [buildings]);
 
   if (loading) return <div className={styles.loading}></div>;
   if (error) return <div className={styles.error}>오류: {error}</div>;
+
+  const { totalCracks, sortedByCount, sortedByWidth, sortedByAvgWidth } =
+    crackStats;
 
   return (
     <div className={styles.container}>
       <div className={styles.content}>
         <div className={styles.mainContent}>
+          {/* 요약 카드 */}
           <div className={styles.summaryGrid}>
-            <SummaryCard title="총 건물 수" value={`${buildings.length}개`} />
-            <SummaryCard
-              title="총 균열 수"
-              value={`${crackStats.totalCracks}개`}
-            />
+            <SummaryCard title="총 건물 수" value={`${buildings.length}`} />
+            <SummaryCard title="발견된 균열 수" value={`${totalCracks}`} />
             <SummaryCard
               title="건물별 균열 수 순위"
               value={
                 <table className={styles.rankTable}>
                   <tbody>
-                    {crackStats.sortedByCount.map((b, i) => (
-                      <tr key={b.id}>
-                        <td>{i + 1}</td>
-                        <td>{b.name}</td>
-                        <td>{b.crackCount}건</td>
-                      </tr>
-                    ))}
-                    {crackStats.sortedByCount.length === 0 && (
+                    {sortedByCount.length ? (
+                      sortedByCount.map((b, i) => (
+                        <tr key={b.id}>
+                          <td>{i + 1}</td>
+                          <td>{b.name}</td>
+                          <td>{b.crackCount}건</td>
+                        </tr>
+                      ))
+                    ) : (
                       <tr>
                         <td colSpan={3}>데이터 없음</td>
                       </tr>
@@ -303,18 +237,19 @@ function BuildingList() {
               }
             />
             <SummaryCard
-              title="건물별 균열 최대 폭 순위"
+              title="건물별 최대 균열 폭 순위"
               value={
                 <table className={styles.rankTable}>
                   <tbody>
-                    {crackStats.sortedByWidth.map((b, i) => (
-                      <tr key={b.id}>
-                        <td>{i + 1}</td>
-                        <td>{b.name}</td>
-                        <td>{b.maxWidth.toFixed(1)} mm</td>
-                      </tr>
-                    ))}
-                    {crackStats.sortedByWidth.length === 0 && (
+                    {sortedByWidth.length ? (
+                      sortedByWidth.map((b, i) => (
+                        <tr key={b.id}>
+                          <td>{i + 1}</td>
+                          <td>{b.name}</td>
+                          <td>{b.maxWidth.toFixed(1)} mm</td>
+                        </tr>
+                      ))
+                    ) : (
                       <tr>
                         <td colSpan={3}>데이터 없음</td>
                       </tr>
@@ -323,20 +258,20 @@ function BuildingList() {
                 </table>
               }
             />
-
             <SummaryCard
               title="평균 균열 폭 순위"
               value={
                 <table className={styles.rankTable}>
                   <tbody>
-                    {crackStats.sortedByAvgWidth.map((b, i) => (
-                      <tr key={b.id}>
-                        <td>{i + 1}</td>
-                        <td>{b.name}</td>
-                        <td>{b.avgWidth.toFixed(1)} mm</td>
-                      </tr>
-                    ))}
-                    {crackStats.sortedByAvgWidth.length === 0 && (
+                    {sortedByAvgWidth.length ? (
+                      sortedByAvgWidth.map((b, i) => (
+                        <tr key={b.id}>
+                          <td>{i + 1}</td>
+                          <td>{b.name}</td>
+                          <td>{b.avgWidth.toFixed(1)} mm</td>
+                        </tr>
+                      ))
+                    ) : (
                       <tr>
                         <td colSpan={3}>데이터 없음</td>
                       </tr>
@@ -347,7 +282,7 @@ function BuildingList() {
             />
           </div>
 
-          {/* 검색 및 버튼 */}
+          {/* 검색 & 필터 */}
           <div className={styles.controlBar}>
             <div className={styles.searchWrapper}>
               <img
@@ -364,49 +299,31 @@ function BuildingList() {
               />
             </div>
             <div className={styles.buttonGroup}>
-              <button
-                className={
-                  activeFilters.includes("가로형") ? styles.activeFilter : ""
-                }
-                onClick={() => toggleFilter("가로형")}
-              >
-                가로형
-              </button>
-              <button
-                className={
-                  activeFilters.includes("세로형") ? styles.activeFilter : ""
-                }
-                onClick={() => toggleFilter("세로형")}
-              >
-                세로형
-              </button>
-              <button
-                className={
-                  activeFilters.includes("경사형") ? styles.activeFilter : ""
-                }
-                onClick={() => toggleFilter("경사형")}
-              >
-                경사형
-              </button>
-              <button
-                className={
-                  activeFilters.includes("망상형") ? styles.activeFilter : ""
-                }
-                onClick={() => toggleFilter("망상형")}
-              >
-                망상형
-              </button>
-              <Link to="/buildings/add" className={styles.addBuildingBtn}>
-                건물 추가
-              </Link>
+              {["심각", "주의", "관찰"].map((f) => (
+                <button
+                  key={f}
+                  className={
+                    activeFilters.includes(f) ? styles.activeFilter : ""
+                  }
+                  onClick={() => {
+                    setActiveFilters((prev) =>
+                      prev.includes(f)
+                        ? prev.filter((x) => x !== f)
+                        : [...prev, f]
+                    );
+                  }}
+                >
+                  {f}
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* 건물 카드 목록 */}
+          {/* 건물 카드 그리드 */}
           <div className={styles.buildingGrid}>
             {filteredBuildings.length > 0 ? (
-              filteredBuildings.map((building) => (
-                <BuildingCard key={building.id} building={building} />
+              filteredBuildings.map((b) => (
+                <BuildingCard key={b.id} building={b} />
               ))
             ) : (
               <div className={styles.noResults}>검색 결과가 없습니다.</div>
