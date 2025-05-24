@@ -7,3 +7,8 @@
   to = "http://3.37.127.247:8080/:splat"
   status = 200
   force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
