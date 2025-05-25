@@ -5,6 +5,21 @@ import { API_BASE_URL } from "../config/api";
 
 import ImagePopup from "./ImagePopup"; // 외부 ImagePopup 컴포넌트 import
 
+// 고도 조회 함수 추가
+const getElevationFromGoogle = async (lat, lon) => {
+  try {
+    const response = await fetch(
+      `/.netlify/functions/elevation?lat=${lat}&lon=${lon}`
+    );
+    const data = await response.json();
+    const elevation = data?.results?.[0]?.elevation;
+    return typeof elevation === "number" ? elevation : 0;
+  } catch (err) {
+    console.error("Google Elevation API 오류:", err);
+    return 0;
+  }
+};
+
 export default function VWorldMaps({
   visible,
   onClose,
@@ -38,6 +53,9 @@ export default function VWorldMaps({
   const [cesiumReady, setCesiumReady] = useState(false); // Cesium 초기화 상태 추가
 
   const [showTooltip, setShowTooltip] = useState(false); // 툴크 표시 상태 추가
+
+  // 1. 상태 추가 – 건물 지형 고도 저장용
+  const [buildingTerrainElevation, setBuildingTerrainElevation] = useState(0);
 
   // 초기 마운트 시 waypointId prop 적용을 위한 ref
   const initialMountRef = useRef(true);
@@ -146,7 +164,7 @@ export default function VWorldMaps({
 
     try {
       console.log(
-        `마커 추가 시도: ${label}, 위치: ${longitude}, ${latitude}, 색상: ${color}, 타입: ${type}, 웨이포인트ID: ${waypointId}`
+        `마커 추가 시도: ${label}, 위치: ${longitude}, ${latitude}, 색상: ${color}, 타입: ${type}, 웨이포인트ID: ${waypointId}, 높이: ${height}`
       );
 
       const markerId = `marker-${type}-${Date.now()}-${Math.random()
@@ -361,6 +379,18 @@ export default function VWorldMaps({
       });
   }, [buildingId, visible]);
 
+  // 3. 건물 정보 불러온 직후 고도 조회
+  useEffect(() => {
+    if (!building || !building.location) return;
+
+    const { latitude, longitude } = building.location;
+
+    getElevationFromGoogle(latitude, longitude).then((elevation) => {
+      console.log("Google Elevation API 결과 (건물 고도):", elevation);
+      setBuildingTerrainElevation(elevation);
+    });
+  }, [building]);
+
   // VWorld 맵 초기화 및 Cesium 연동
   useEffect(() => {
     if (!visible || !window.vw) return;
@@ -508,17 +538,18 @@ export default function VWorldMaps({
     ) {
       console.log("건물 마커 추가 시도:", building.name);
 
+      // 5. 건물 마커도 반영 (선택적)
       const markerId = addMarker(
         building.location.longitude,
         building.location.latitude,
         building.name,
         "BLUE",
-        10,
+        buildingTerrainElevation, // ← 건물 지형 고도 반영
         "building"
       );
       console.log("건물 마커 추가 완료:", markerId);
     }
-  }, [building, cesiumReady]);
+  }, [building, cesiumReady, buildingTerrainElevation]); // Add buildingTerrainElevation to dependencies
 
   // 균열 데이터 로드 및 마커 추가 시 마커 높이 수정
   useEffect(() => {
@@ -574,8 +605,9 @@ export default function VWorldMaps({
             }
           }
 
-          // 웨이포인트 원래 높이 사용 (높이 추가하지 않음)
-          const waypointAltitude = waypoint.location.altitude || 10;
+          // 4. 웨이포인트 마커 높이에 고도 반영
+          const waypointAltitude =
+            (waypoint.location.altitude || 10) + buildingTerrainElevation;
 
           // 마커 높이값만 로그 출력
           console.log(
@@ -652,7 +684,7 @@ export default function VWorldMaps({
           const buildingPosition = window.Cesium.Cartesian3.fromDegrees(
             building.location.longitude,
             building.location.latitude,
-            200 // 기본 높이
+            buildingTerrainElevation + 200 // 건물 지형 고도 + 기본 높이
           );
 
           cesiumViewerRef.current.camera.flyTo({
@@ -671,7 +703,7 @@ export default function VWorldMaps({
         }
       }
     }
-  }, [building, cesiumReady, selectedWaypointId]);
+  }, [building, cesiumReady, selectedWaypointId, buildingTerrainElevation]); // Add buildingTerrainElevation to dependencies
 
   // 마커 클릭 이벤트 핸들러 설정
   useEffect(() => {
@@ -754,7 +786,8 @@ export default function VWorldMaps({
                 waypoint.location.longitude &&
                 waypoint.location.latitude
               ) {
-                const waypointAltitude = waypoint.location.altitude || 10;
+                const waypointAltitude =
+                  (waypoint.location.altitude || 10) + buildingTerrainElevation; // Reflect elevation
 
                 // 카메라 이동 시도
                 try {
@@ -810,7 +843,13 @@ export default function VWorldMaps({
         }
       }
     };
-  }, [cesiumReady, cracks, building]);
+  }, [
+    cesiumReady,
+    cracks,
+    building,
+    selectedWaypointId,
+    buildingTerrainElevation,
+  ]); // Add buildingTerrainElevation to dependencies
 
   // 건물 정보가 로드되면 위치 확인
   useEffect(() => {
